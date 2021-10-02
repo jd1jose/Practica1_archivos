@@ -105,16 +105,6 @@ CONSTRAINT fk_estado
       FOREIGN KEY(estado) 
 	  REFERENCES estado(id_estado)
 );
-create table renta(
-id_renta int GENERATED ALWAYS AS IDENTITY primary key,
-fecha_renta date,
-monto_pagar float,
-fecha_pago date,
-id_empleado int,
-CONSTRAINT fk_renta
-   FOREIGN KEY(id_empleado) 
-	  REFERENCES empleado(id_empleado)
-);
 create table pelicula_actor(
 id_pelicula int references pelicula(id_pelicula),
 id_actor int references actores(id_actores),
@@ -123,8 +113,27 @@ CONSTRAINT pelicula_actor_pkey PRIMARY KEY (id_pelicula, id_actor)
 create table pelicula_tienda(
 id_pelicula int references pelicula(id_pelicula),
 id_tienda int references tienda(id_tienda),
-cantidad int,
 CONSTRAINT pelicula_tienda_pkey PRIMARY KEY (id_pelicula, id_tienda)  
+);
+create table renta(
+id_renta int GENERATED ALWAYS AS IDENTITY primary key,
+fecha_renta date,
+fecha_retorno date,
+monto_pagar float,
+fecha_pago date,
+id_empleado int,
+id_cliente int,
+CONSTRAINT fk_renta_empleado
+   FOREIGN KEY(id_empleado) 
+	  REFERENCES empleado(id_empleado),
+CONSTRAINT fk_renta_cliente
+   FOREIGN KEY(id_cliente) 
+	  REFERENCES cliente(id_cliente)
+);
+create table renta_pelicula(
+id_pelicula int references pelicula(id_pelicula),
+id_renta int references renta(id_renta),
+CONSTRAINT pelicula_renta_pkey PRIMARY KEY (id_pelicula, id_renta)  
 );
 create table public.temporal(
 NOMBRE_CLIENTE varchar(45),
@@ -170,12 +179,7 @@ CATEGORIA_PELICULA varchar(50),
 ACTOR_PELICULA varchar(50)
 );
 
-
-select * from temporal
-
 COPY public.temporal From '/home/jose/Escritorio/Practica1/BlockbusterData.csv' DELIMITER ';' CSV HEADER
-
-
 -------------------------
 insert into ciudad (nombre_ciudad) 
 select distinct ciudad_cliente
@@ -291,7 +295,26 @@ from temporal as a, tienda as b, pelicula as c
 where a.nombre_pelicula!='-' and a.nombre_pelicula =c.nombre_pelicula and a.tienda_pelicula= b.nombre_tienda 
 order by c.id_pelicula asc
 --------------------------------------------------------------------------
+insert into renta(id_cliente, fecha_renta, fecha_retorno, monto_pagar, fecha_pago, id_empleado)
+select distinct  b.id_cliente,
+TO_DATE(fecha_renta::TEXT,'DD M YYY'),
+TO_DATE(fecha_retorno::TEXT,'DD M YYY'),
+CAST(monto_a_pagar as float), 
+TO_DATE(fecha_pago::TEXT,'DD M YYY'),
+c.id_empleado
+from temporal as a, cliente as b, empleado as c
+where a.nombre_cliente!='-' and fecha_retorno!='-' and fecha_renta!='-' and fecha_pago!='-'and monto_a_pagar!='-'
+and a.correo_cliente=b.correo and a.correo_empleado=c.correo_empleado
+----------------------------------------------------------------------------
+insert into renta_pelicula(id_renta, id_pelicula)
+select distinct  d.id_renta,c.id_pelicula 
+from temporal as a,cliente as b, pelicula as c, renta as d
+where a.fecha_renta!='-' and a.nombre_pelicula!='-' and a.nombre_cliente!='-'
+and a.correo_cliente=b.correo
+and a.nombre_pelicula=c.nombre_pelicula
+and b.id_cliente=d.id_cliente
 
-select *from temporal
-select * from pelicula_actor
-DELETE from ciudad
+Drop table temporal
+
+
+
