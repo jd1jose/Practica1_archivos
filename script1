@@ -1,0 +1,297 @@
+create table estado(
+id_Estado int GENERATED ALWAYS AS IDENTITY primary key,
+nombreEstado varchar(45)
+);
+create table ciudad(
+id_Ciudad int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_Ciudad varchar(100)
+);
+create table pais(
+id_Pais int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_Pais varchar(100)
+
+);
+Create table cliente(
+id_Cliente int GENERATED ALWAYS AS IDENTITY primary key,
+nombre varchar(45),
+apellido varchar(45),
+correo varchar (100),
+direccion varchar(100),
+fecha_Creacion date,
+tienda_Fav    varchar(45),
+codigo_postal int,
+estado int,
+ciudad int,
+pais int,
+CONSTRAINT fk_estado
+      FOREIGN KEY(estado) 
+	  REFERENCES estado(id_estado),
+CONSTRAINT fk_ciudad
+      FOREIGN KEY(ciudad) 
+	  REFERENCES ciudad(id_ciudad),
+CONSTRAINT fk_pais
+      FOREIGN KEY(pais) 
+	  REFERENCES pais(id_pais)
+);
+create table categoria_pelicula(
+id_categoria int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_categoria varchar(100)
+);
+create table clasificacion_pelicula(
+id_clasificacion int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_clasificacion varchar(100)
+);
+create table actores(
+id_actores int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_actores varchar(100)
+);
+create table tienda(
+id_tienda int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_tienda varchar(100),
+encargado_tienda varchar(100),
+direccion_tienda varchar(100),
+codigo_postal_tienda int,
+ciudad int,
+pais int,
+CONSTRAINT fk_ciudad
+      FOREIGN KEY(ciudad) 
+	  REFERENCES ciudad(id_ciudad),
+CONSTRAINT fk_pais
+      FOREIGN KEY(pais) 
+	  REFERENCES pais(id_pais)
+);
+create table pelicula(
+id_pelicula int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_pelicula varchar(50),
+descripcion varchar(150),
+pelicula_año int,
+duracion int,
+idioma_pelicula varchar(50),
+dias_renta int,
+costo_renta float,
+costo_daño float,
+id_categoria int,
+id_clasificacion int,
+CONSTRAINT fk_categoria
+      FOREIGN KEY(id_categoria) 
+	  REFERENCES categoria_pelicula(id_categoria),
+CONSTRAINT fk_clasificacion
+      FOREIGN KEY(id_clasificacion) 
+	  REFERENCES clasificacion_pelicula(id_clasificacion)
+);
+create table empleado(
+id_empleado int GENERATED ALWAYS AS IDENTITY primary key,
+nombre_empleado varchar(45),
+apellido_empleado varchar(45),
+usuario_empleado varchar(50),
+contraseña_empleado varchar(250),
+direccion_empleado varchar(75),
+correo_empleado varchar(75),
+codigo_postal int,
+ciudad int,
+pais int,
+tienda int,
+estado int,
+CONSTRAINT fk_ciudad
+      FOREIGN KEY(ciudad) 
+	  REFERENCES ciudad(id_ciudad),
+CONSTRAINT fk_pais
+      FOREIGN KEY(pais) 
+	  REFERENCES pais(id_pais),
+CONSTRAINT fk_tienda
+      FOREIGN KEY(tienda) 
+	  REFERENCES tienda(id_tienda),
+CONSTRAINT fk_estado
+      FOREIGN KEY(estado) 
+	  REFERENCES estado(id_estado)
+);
+create table renta(
+id_renta int GENERATED ALWAYS AS IDENTITY primary key,
+fecha_renta date,
+monto_pagar float,
+fecha_pago date,
+id_empleado int,
+CONSTRAINT fk_renta
+   FOREIGN KEY(id_empleado) 
+	  REFERENCES empleado(id_empleado)
+);
+create table pelicula_actor(
+id_pelicula int references pelicula(id_pelicula),
+id_actor int references actores(id_actores),
+CONSTRAINT pelicula_actor_pkey PRIMARY KEY (id_pelicula, id_actor)  
+);
+create table pelicula_tienda(
+id_pelicula int references pelicula(id_pelicula),
+id_tienda int references tienda(id_tienda),
+cantidad int,
+CONSTRAINT pelicula_tienda_pkey PRIMARY KEY (id_pelicula, id_tienda)  
+);
+create table public.temporal(
+NOMBRE_CLIENTE varchar(45),
+CORREO_CLIENTE varchar(45),
+CLIENTE_ACTIVO varchar(10),
+FECHA_CREACION varchar(50),
+TIENDA_PREFERIDA varchar(45),
+DIRECCION_CLIENTE varchar(50),
+CODIGO_POSTAL_CLIENTE varchar(50),
+CIUDAD_CLIENTE varchar(50),
+PAIS_CLIENTE varchar(50),
+FECHA_RENTA varchar(50),
+FECHA_RETORNO varchar(50),
+MONTO_A_PAGAR varchar(50),
+FECHA_PAGO varchar(50),
+NOMBRE_EMPLEADO varchar(50),
+CORREO_EMPLEADO	varchar (50),
+EMPLEADO_ACTIVO	varchar(10),
+TIENDA_EMPLEADO varchar(20),
+USUARIO_EMPLEADO varchar(10),
+CONTRASEÑA_EMPLEADO varchar(250),
+DIRECCION_EMPLEADO varchar (100),
+CODIGO_POSTAL_EMPLEADO varchar(10),
+CIUDAD_EMPLEADO varchar(100),
+PAIS_EMPLEADO varchar(100),
+NOMBRE_TIENDA varchar(100),
+ENCARGADO_TIENDA varchar(50),
+DIRECCION_TIENDA varchar(45),
+CODIGO_POSTAL_TIENDA varchar(10),
+CIUDAD_TIENDA varchar(50),
+PAIS_TIENDA varchar(50),
+TIENDA_PELICULA varchar(50),
+NOMBRE_PELICULA	varchar (50),
+DESCRIPCION_PELICULA varchar(500),
+ANIO_LANZAMIENTO varchar(50),
+DIAS_RENTA varchar(50),
+COSTO_RENTA	varchar(50),
+DURACION varchar(50),
+COSTO_POR_DAÑO varchar(50),
+CLASIFICACION varchar(10),
+LENGUAJE_PELICULA varchar(45),
+CATEGORIA_PELICULA varchar(50),
+ACTOR_PELICULA varchar(50)
+);
+
+
+select * from temporal
+
+COPY public.temporal From '/home/jose/Escritorio/Practica1/BlockbusterData.csv' DELIMITER ';' CSV HEADER
+
+
+-------------------------
+insert into ciudad (nombre_ciudad) 
+select distinct ciudad_cliente
+from temporal
+where ciudad_cliente !='-' 
+union 
+select distinct ciudad_empleado
+from temporal
+where ciudad_empleado !='-' 
+union 
+select distinct ciudad_tienda
+from temporal
+where ciudad_tienda !='-' 
+order by 
+ciudad_cliente asc
+-----------------------------------------------
+insert into pais (nombre_pais) 
+select distinct pais_cliente
+from temporal
+where pais_cliente !='-' 
+union 
+select distinct pais_empleado
+from temporal
+where pais_empleado !='-' 
+union 
+select distinct pais_tienda
+from temporal
+where pais_tienda !='-' 
+order by 
+pais_cliente asc
+-----------------------------------------------
+insert into estado (nombreestado) 
+select distinct cliente_activo
+from temporal
+where cliente_activo !='-' 
+union 
+select distinct empleado_activo
+from temporal
+where empleado_activo !='-' 
+-----------------------------------------------
+insert into categoria_pelicula(nombre_categoria)
+select distinct CATEGORIA_PELICULA
+from temporal
+where CATEGORIA_PELICULA !='-' 
+order by 
+CATEGORIA_PELICULA asc
+------------------------------------------------
+insert into clasificacion_pelicula(nombre_clasificacion)
+select distinct clasificacion
+from temporal
+where clasificacion !='-'
+order by
+clasificacion asc
+------------------------------------------------------------
+insert into pelicula(id_clasificacion, id_categoria, costo_daño,costo_renta, dias_renta, pelicula_año,duracion,nombre_pelicula, descripcion, idioma_pelicula)
+select distinct b.id_clasificacion,c.id_categoria, cast(costo_por_daÑo as float),cast(costo_renta as float),cast(dias_renta as integer), cast(anio_lanzamiento as integer),cast( duracion as integer),nombre_pelicula, descripcion_pelicula, lenguaje_pelicula
+from temporal as a , categoria_pelicula as c, clasificacion_pelicula as b
+where nombre_pelicula !='-' and c.nombre_categoria =a.categoria_pelicula and b.nombre_clasificacion =a.clasificacion
+order by nombre_pelicula asc
+-----------------------------------------------------------------------------------------------------
+insert into tienda (nombre_tienda,encargado_tienda, direccion_tienda, ciudad, pais)
+select distinct   nombre_tienda,encargado_tienda,direccion_tienda, a.id_ciudad, b.id_pais
+from temporal as c, ciudad as a, pais as b
+where nombre_tienda!='-' and c.pais_tienda=b.nombre_pais and c.ciudad_tienda =a.nombre_ciudad
+order by nombre_tienda asc
+--------------------------------------------------------------------------------------------------
+insert into cliente (direccion,nombre, apellido, correo, fecha_creacion, tienda_fav, codigo_postal, estado, ciudad, pais)
+Select distinct 
+ direccion_cliente,
+ split_part(nombre_cliente::TEXT, ' ', 1)nombre,
+ split_part(nombre_cliente::TEXT, ' ', 2)Apellido,
+ correo_cliente,
+ TO_DATE(fecha_creacion::TEXT,'DD M YYY'),
+ tienda_preferida,
+ to_number(codigo_postal_cliente,'99G999D9S'),
+ d.id_estado,
+ b.id_ciudad,
+ c.id_pais
+from temporal as a, ciudad as b, pais as c, estado as d
+where a.nombre_cliente != '-' and a.ciudad_cliente=b.nombre_ciudad and a.pais_cliente=c.nombre_pais and a.cliente_activo=d.nombreestado
+order by correo_cliente asc
+------------------------------------------------------------------------------------------
+insert into empleado (nombre_empleado, apellido_empleado,correo_empleado, usuario_empleado, contraseña_empleado,direccion_empleado, estado, ciudad, pais,tienda)
+Select distinct 
+ split_part(nombre_empleado::TEXT, ' ', 1)nombre,
+ split_part(nombre_empleado::TEXT, ' ', 2)Apellido,
+ correo_empleado,
+ usuario_empleado,
+ contraseÑa_empleado,
+ direccion_empleado,
+ d.id_estado,
+ b.id_ciudad,
+ c.id_pais,
+ e.id_tienda
+from temporal as a, ciudad as b, pais as c, estado as d, tienda as e
+where a.nombre_empleado != '-' and a.ciudad_empleado=b.nombre_ciudad and a.pais_empleado=c.nombre_pais and a.empleado_activo=d.nombreestado and a.tienda_empleado= e.nombre_tienda
+order by correo_empleado asc
+------------------------------------------------------------------
+insert into actores(nombre_actores)
+select distinct actor_pelicula from temporal
+where actor_pelicula!='-'
+order by actor_pelicula
+-------------------------------------------------------------------------------
+insert into  pelicula_actor(id_pelicula, id_actor) 
+select distinct b.id_pelicula, c.id_actores
+from temporal as a, pelicula as b, actores as c
+where a.nombre_pelicula =b.nombre_pelicula and a.actor_pelicula = c.nombre_actores
+order by b.id_pelicula asc
+----------------------------------------------------------------------
+insert into pelicula_tienda(id_pelicula, id_tienda)
+select distinct c.id_pelicula,b.id_tienda
+from temporal as a, tienda as b, pelicula as c
+where a.nombre_pelicula!='-' and a.nombre_pelicula =c.nombre_pelicula and a.tienda_pelicula= b.nombre_tienda 
+order by c.id_pelicula asc
+--------------------------------------------------------------------------
+
+select *from temporal
+select * from pelicula_actor
+DELETE from ciudad
